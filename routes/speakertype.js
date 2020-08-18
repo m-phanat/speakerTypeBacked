@@ -42,6 +42,7 @@ router.post('/add', async (req, res) => {
     id: obj.id,
     username: obj.username,
     channel: obj.channel,
+    imageUrl: obj.imageUrl,
     displayName: obj.displayName,
     speakerType: obj.speakerType,
     companyName: obj.companyName,
@@ -85,6 +86,7 @@ router.get('/random', async (req, res) => {
     displayName: faker.name.findName(),
     speakerType: faker.address.country(),
     companyName: faker.company.companyName(),
+    imageUrl: faker.image.avatar(),
     specialType: [],
     updatetime: moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSSSZ'),
     createdate: moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSSSZ')

@@ -14,6 +14,7 @@ module.exports = {
 let speakerType = Schema({
   id: { type: 'String', default: '' },
   username: { type: 'String', default: '' },
+  imageUrl: { type: 'String', default: '' },
   channel: { type: 'String', default: '' },
   displayName: { type: 'String', default: '' },
   speakerType: { type: 'String', default: '' },
