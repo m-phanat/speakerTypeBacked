@@ -4,7 +4,7 @@ const moment = require('moment')
 const faker = require('faker')
 
 router.get('/', (req, res) => {
-  res.send('<h1>test</h1>')
+  res.send('<h1>speaker-type</h1>')
 })
 
 let collection = 'speaker-type'
@@ -15,8 +15,8 @@ router.get('/getList', async (req, res) => {
 })
 
 router.post('/getListFromChannel', async (req, res) => {
-  let skip = req?.body?.skip || 0
-  let limit = req?.body?.limit || 10
+  let skip = req.body?.skip || 0
+  let limit = req.body?.limit || 10
   console.log(req.body)
   let query = { channel: req.body.channel }
   let json = await mongodb.find(collection, 'speakerType', query, {}, skip, limit)
@@ -24,7 +24,7 @@ router.post('/getListFromChannel', async (req, res) => {
 })
 
 router.post('/getCount', async (req, res) => {
-  console.log('/getCount')
+  // console.log('/getCount')
   let query = {}
   if (req?.body?.channel) {
     query = { channel: req.body.channel }
@@ -35,28 +35,27 @@ router.post('/getCount', async (req, res) => {
 })
 
 router.post('/add', async (req, res) => {
-  console.log('body ', req.body)
+  // console.log('body ', req.body)
   let obj = req.body
 
   let model = {
-    id: obj.id,
-    username: obj.username,
-    channel: obj.channel,
-    imageUrl: obj.imageUrl,
-    displayName: obj.displayName,
-    speakerType: obj.speakerType,
-    companyName: obj.companyName,
-    specialType: obj.specialType || [],
+    id: obj?.id,
+    username: obj?.username,
+    channel: obj?.channel,
+    imageUrl: obj?.imageUrl,
+    displayName: obj?.displayName,
+    speakerType: obj?.speakerType,
+    companyName: obj?.companyName,
+    specialType: obj?.specialType || [],
     updatetime: moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSSSZ')
   }
 
-  let select = { username: obj.username }
-  console.log(obj?._id)
+  let select = {}
   if (!obj?._id) {
-    console.log('not have id')
+    // console.log('not have id')
     model.createdate = moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSSSZ')
   } else {
-    console.log('have id', obj._id)
+    // console.log('have id', obj._id)
     select = { _id: obj._id }
   }
 
@@ -83,6 +82,7 @@ router.get('/random', async (req, res) => {
     id: faker.random.number(),
     username: faker.name.firstName(),
     channel: channel[faker.random.number() % 4],
+    url: faker.internet.url(),
     displayName: faker.name.findName(),
     speakerType: faker.address.country(),
     companyName: faker.company.companyName(),
@@ -91,17 +91,25 @@ router.get('/random', async (req, res) => {
     updatetime: moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSSSZ'),
     createdate: moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSSSZ')
   }
-  console.log(model)
-  let json = await mongodb.updateOne(
-    collection,
-    'speakerType',
-    { username: faker.name.firstName() },
-    {
-      $set: model
-    },
-    { upsert: true }
-  )
+  // console.log(model)
+
+  let data = { $set: model }
+  let isInsert = { upsert: true }
+  let query = { username: faker.name.firstName() }
+  let json = await mongodb.updateOne(collection, 'speakerType', query, data, isInsert)
   res.json(json)
+})
+
+router.post('/check', async (req, res) => {
+  let query = { username: req.body.username, companyName: req.body.companyName }
+  // console.log(req.body)
+  let json = await mongodb.findOne(collection, 'speakerType', query, {})
+  if (json) {
+  }
+  let model = {
+    result: json
+  }
+  res.json(model)
 })
 
 module.exports = router
