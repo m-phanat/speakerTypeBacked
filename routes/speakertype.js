@@ -1,5 +1,6 @@
 const router = require('express').Router()
 let mongodb = require('..//helper/mongodb')
+const mongoose = require('mongoose')
 const moment = require('moment')
 const faker = require('faker')
 
@@ -46,8 +47,7 @@ router.post('/add', async (req, res) => {
     specialType: obj?.specialType || [],
     updatetime: moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSSSZ')
   }
-
-  let select = {}
+  let select = { _id: new mongoose.Types.ObjectId() }
   if (!obj?._id) {
     model.createdate = moment(new Date()).format('YYYY-MM-DDTHH:mm:ss.SSSSZ')
   } else {
