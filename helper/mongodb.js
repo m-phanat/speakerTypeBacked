@@ -27,14 +27,25 @@ let speakerType = Schema({
   specialType: []
 })
 
+let page = Schema({
+  id: { type: 'String', default: '' },
+  name: { type: 'String', default: '' },
+  priority: { type: 'Number', default: 0 },
+  limit: { type: 'Number', default: 0 },
+  createdate: { type: 'String', default: '' },
+  updatetime: { type: 'String', default: '' }
+})
+
 function init(schema) {
   var inputMap = {
-    speakerType: speakerType
+    speakerType: speakerType,
+    page: page
   }
   var defaultSchema = null
   return inputMap[schema] || defaultSchema
 }
 
+page.plugin(mongoose_delete, { overrideMethods: true, deletedAt: true })
 speakerType.plugin(mongoose_delete, { overrideMethods: true, deletedAt: true })
 
 async function count(collection, schema, obj = {}) {
