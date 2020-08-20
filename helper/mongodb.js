@@ -7,6 +7,7 @@ module.exports = {
   find,
   findOne,
   updateOne,
+  updateMany,
   findAggregate,
   deleteOne,
   softDelete
@@ -99,4 +100,13 @@ async function deleteOne(collection, schema, id) {
   cursor = JSON.stringify(cursor)
   cursor = JSON.parse(cursor)
   return cursor
+}
+
+async function updateMany(collection, schema, value = []) {
+  schema = await init(schema)
+  let model = await mongoose.model(collection, schema, collection)
+  let cursor = await model.insertMany(value)
+  cursor = JSON.stringify(cursor)
+  cursor = JSON.parse(cursor)
+  return await cursor
 }

@@ -1,5 +1,6 @@
 const router = require('express').Router()
 let mongodb = require('..//helper/mongodb')
+let helper = require('..//helper/helper')
 const mongoose = require('mongoose')
 const moment = require('moment')
 const fs = require('fs')
@@ -189,14 +190,51 @@ router.get('/export', async (req, res) => {
   }
   const stream = fs.createReadStream(pathname)
   stream.pipe(res)
+  helper.delete_file(pathname)
+})
 
-  //Delete File
-  fs.unlink(pathname, function (err) {
-    if (err) {
-      throw err
+var multer = require('multer')
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './')
+  },
+  filename: function (req, file, cb) {
+    cb(null, 'import-data.xlsx')
+  }
+})
+var upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      cb(null, true)
     } else {
-      console.log('Successfully deleted the file.', pathname)
+      cb(null, false)
+      return cb(new Error('Only .xlsx format allowed!'))
     }
+  }
+})
+
+router.post('/upload', upload.single('file'), async (req, res) => {
+  let pathname = './import-data.xlsx'
+  let query = {}
+  if (req?.body?.channel) {
+    query = { channel: req.body.channel }
+  }
+  var wb = XLSX.readFile(pathname)
+  let name_ws = wb.SheetNames[0]
+  var worksheet = wb.Sheets[name_ws]
+  var json = XLSX.utils.sheet_to_json(worksheet)
+
+  json.forEach(async (it) => {
+    let select = { channel: it.channel, displayName: it.displayName }
+    let data = { $set: it }
+    let isInsert = { upsert: true }
+    await mongodb.updateOne(collection, 'speakerType', select, data, isInsert)
+  })
+  helper.delete_file(pathname)
+  res.json({
+    status: 'success'
   })
 })
 
