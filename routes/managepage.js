@@ -49,23 +49,32 @@ router.post('/crawl-user', async (req, res) => {
   }
   let raw_url = req.body.url
   let page = ''
+  let url = ''
   if (raw_url.includes('facebook')) {
     raw_url = raw_url.split('.com/')
     page = raw_url[1].split('/')[0]
-    console.log('crawl ', page)
-    let url = `https://graph.facebook.com/v8.0/${page}?fields=id,name,picture,fan_count&access_token=314032576098038|HZOtbOFOll8pcYyZda7n4UD528M`
-    let promise = axios.get(url).catch((e) => {
-      res.send(e)
-    })
-    let result = await promise
-    res.send(result.data)
+    url = `https://graph.facebook.com/v8.0/${page}?fields=id,name,picture,fan_count&access_token=314032576098038|HZOtbOFOll8pcYyZda7n4UD528M`
+  } else if (raw_url.includes('twitter')) {
+    raw_url = raw_url.split('.com/')
+    page = raw_url[1].split('/')[0]
+    url = `https://tw.arukas.app/twitter/users_show?screen_name=${page}`
   } else {
-    res.json({
+    return res.json({
       status: false
     })
   }
-  console.log(page)
 
+  let promise = axios.get(url).catch((e) => {
+    res.json({
+      errors: [
+        {
+          code: 50,
+          message: 'User not found.'
+        }
+      ]
+    })
+  })
+  let result = await promise
   res.send(result.data)
 })
 
