@@ -13,9 +13,10 @@ router.get('/', (req, res) => {
 })
 
 let collection = 'speaker-type'
+let schema = 'speakerType'
 
 router.get('/getList', async (req, res) => {
-  let json = await mongodb.find(collection, 'speakerType', {}, { _id: -1 }, 0, 100).catch((err) => {
+  let json = await mongodb.find(collection, schema, {}, { _id: -1 }, 0, 100).catch((err) => {
     res.send('Could not find data in MongoDb...')
   })
   res.json(json)
@@ -25,7 +26,7 @@ router.post('/getListFromChannel', async (req, res) => {
   let skip = req.body?.skip || 0
   let limit = req.body?.limit || 10
   let query = { channel: req.body.channel }
-  let json = await mongodb.find(collection, 'speakerType', query, {}, skip, limit)
+  let json = await mongodb.find(collection, schema, query, {}, skip, limit)
   res.json(json)
 })
 
@@ -34,7 +35,7 @@ router.post('/getCount', async (req, res) => {
   if (req?.body?.channel) {
     query = { channel: req.body.channel }
   }
-  let json = await mongodb.count(collection, 'speakerType', query, {}, 0, 10)
+  let json = await mongodb.count(collection, schema, query, {}, 0, 10)
   let model = { totalData: json }
   res.json(model)
 })
@@ -62,19 +63,19 @@ router.post('/add', async (req, res) => {
 
   let data = { $set: model }
   let isInsert = { upsert: true }
-  let json = await mongodb.updateOne(collection, 'speakerType', select, data, isInsert)
+  let json = await mongodb.updateOne(collection, schema, select, data, isInsert)
   res.json(json)
 })
 
 router.post('/remove', async (req, res) => {
   console.log(req.body)
-  let json = await mongodb.softDelete(collection, 'speakerType', req.body.id)
+  let json = await mongodb.softDelete(collection, schema, req.body.id)
   res.json(json)
 })
 
 router.post('/check', async (req, res) => {
   let query = { username: req.body.username, companyName: req.body.companyName }
-  let json = await mongodb.findOne(collection, 'speakerType', query, {})
+  let json = await mongodb.findOne(collection, schema, query, {})
 
   if (json) {
     let model = { result: json }
@@ -108,7 +109,7 @@ router.get('/random', async (req, res) => {
     let data = { $set: model }
     let isInsert = { upsert: true }
     let query = { username: faker.name.firstName() }
-    await mongodb.updateOne(collection, 'speakerType', query, data, isInsert)
+    await mongodb.updateOne(collection, schema, query, data, isInsert)
   }
   res.status(200)
   res.send('ok')
@@ -121,7 +122,7 @@ router.get('/export', async (req, res) => {
   }
   console.log(query)
 
-  let json = await mongodb.find(collection, 'speakerType', query)
+  let json = await mongodb.find(collection, schema, query)
   // res.json(json)
 
   let header = {
@@ -230,7 +231,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     let select = { channel: it.channel, displayName: it.displayName }
     let data = { $set: it }
     let isInsert = { upsert: true }
-    await mongodb.updateOne(collection, 'speakerType', select, data, isInsert)
+    await mongodb.updateOne(collection, schema, select, data, isInsert)
   })
   helper.delete_file(pathname)
   res.json({
