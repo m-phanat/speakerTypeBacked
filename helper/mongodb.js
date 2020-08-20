@@ -8,7 +8,8 @@ module.exports = {
   findOne,
   updateOne,
   findAggregate,
-  deleteOne
+  deleteOne,
+  softDelete
 }
 
 let speakerType = Schema({
@@ -80,11 +81,21 @@ async function findAggregate(collection, schema, arr = []) {
   return await cursor
 }
 
-async function deleteOne(collection, schema, id) {
+async function softDelete(collection, schema, id) {
   schema = await init(schema)
   let model = await mongoose.model(collection, schema, collection)
   let _id = await mongoose.Types.ObjectId(id)
   let cursor = await model.deleteById(_id)
+  cursor = JSON.stringify(cursor)
+  cursor = JSON.parse(cursor)
+  return cursor
+}
+
+async function deleteOne(collection, schema, id) {
+  schema = await init(schema)
+  let model = await mongoose.model(collection, schema, collection)
+  let _id = await mongoose.Types.ObjectId(id)
+  let cursor = await model.deleteOne({ _id: _id })
   cursor = JSON.stringify(cursor)
   cursor = JSON.parse(cursor)
   return cursor
